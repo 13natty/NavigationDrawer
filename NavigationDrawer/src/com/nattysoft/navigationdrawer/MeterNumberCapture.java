@@ -6,8 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.nattysoft.navigationdrawer.listener.RequestResponseListener;
+import com.nattysoft.navigationdrawer.util.Preferences;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -87,13 +92,13 @@ public class MeterNumberCapture extends Activity implements RequestResponseListe
 		if (savedInstanceState == null) {
 			SelectItem(0);
 		}
-		
+
 		dataList.clear();
 		dataList.add(new DrawerItem("Zones", R.drawable.ic_action_email));
 		dataList.add(new DrawerItem("Capture", R.drawable.ic_action_good));
 		dataList.add(new DrawerItem("View List", R.drawable.ic_action_gamepad));
 		dataList.add(new DrawerItem("Navigate", R.drawable.ic_action_labels));
-		
+
 		adapter = new CustomDrawerAdapter(this, R.layout.custom_drawer_item, dataList);
 
 		mDrawerList.setAdapter(adapter);
@@ -257,22 +262,39 @@ public class MeterNumberCapture extends Activity implements RequestResponseListe
 				startActivity(startMeterNumberCapture);
 			} else if (position == 3) {
 
-				LatLng destiny = new LatLng(-26.181924, 27.908339); // Your
-																	// destiny
-																	// LatLng
-																	// object
-				String uri = "google.navigation:q=%f, %f";
-				Intent navIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Locale.US, uri, destiny.latitude, destiny.longitude)));
-				// if (canHandleIntent(this, navIntent))
-				startActivity(navIntent);
-				// else
-				// Toast.makeText(this, "Please install Google Navigation",
-				// Toast.LENGTH_LONG).show();
+				if (Preferences.getPreference(MeterNumberCapture.this.getApplicationContext(), AppConstants.PreferenceKeys.ZONES_HOUSES_INDEX + ":" + MeterNumberCapture.this.position) != null) {
+					int index = Integer.parseInt(Preferences.getPreference(MeterNumberCapture.this.getApplicationContext(), AppConstants.PreferenceKeys.ZONES_HOUSES_INDEX + ":" + MeterNumberCapture.this.position));
 
-				// Intent intent = new
-				// Intent(android.content.Intent.ACTION_VIEW,
-				// Uri.parse("http://maps.google.com/maps?saddr=20.344,34.34&daddr=20.5666,45.345"));
-				// startActivity(intent);
+					JSONObject jsonObject;
+					try {
+						jsonObject = new JSONObject(Preferences.getPreference(MeterNumberCapture.this.getApplicationContext(), AppConstants.PreferenceKeys.ZONES_JSON + ":" + MeterNumberCapture.this.position));
+
+						JSONArray housesArray = jsonObject.getJSONArray("houses");
+						double latitude = housesArray.getJSONObject(index).getDouble("latitude");
+						double longitude = housesArray.getJSONObject(index).getDouble("longitude");
+						LatLng destiny = new LatLng(latitude, longitude); // Your
+																			// destiny
+																			// LatLng
+																			// object
+
+						String uri = "google.navigation:q=%f, %f";
+						Intent navIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format(Locale.US, uri, destiny.latitude, destiny.longitude)));
+						// if (canHandleIntent(this, navIntent))
+						startActivity(navIntent);
+						// else
+						// Toast.makeText(this,
+						// "Please install Google Navigation",
+						// Toast.LENGTH_LONG).show();
+
+						// Intent intent = new
+						// Intent(android.content.Intent.ACTION_VIEW,
+						// Uri.parse("http://maps.google.com/maps?saddr=20.344,34.34&daddr=20.5666,45.345"));
+						// startActivity(intent);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			} else {
 				SelectItem(position - 1);
 			}

@@ -161,8 +161,8 @@ public class FragmentOne extends Fragment implements LocationListener {
 					if (meaterReading.getText().length() > 0) {
 						try {
 							int lastReading = housesArray.getJSONObject(index).getInt("lastReading");
-							double latitude = housesArray.getJSONObject(index).getInt("latitude");
-							double longitude = housesArray.getJSONObject(index).getInt("longitude");
+							double latitude = housesArray.getJSONObject(index).getDouble("latitude");
+							double longitude = housesArray.getJSONObject(index).getDouble("longitude");
 
 							Location locationA = new Location("point A");
 
@@ -356,8 +356,8 @@ public class FragmentOne extends Fragment implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
-		int lat = (int) (location.getLatitude());
-		int lng = (int) (location.getLongitude());
+		double lat = (double) (location.getLatitude());
+		double lng = (double) (location.getLongitude());
 		// latituteField.setText(String.valueOf(lat));
 		// longitudeField.setText(String.valueOf(lng));
 	}
